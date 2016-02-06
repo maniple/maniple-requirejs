@@ -2,6 +2,17 @@
 
 class ManipleRequirejs_Bootstrap extends Maniple_Application_Module_Bootstrap
 {
+    protected function _initAutoloader()
+    {
+        Zend_Loader_AutoloaderFactory::factory(array(
+            'Zend_Loader_StandardAutoloader' => array(
+                'prefixes' => array(
+                    'ManipleRequirejs_' => dirname(__FILE__) . '/library/',
+                ),
+            ),
+        ));
+    }
+
     protected function _initView()
     {
         /** @var Zend_Application_Bootstrap_Bootstrap $bootstrap */

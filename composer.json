@@ -9,6 +9,7 @@
         }
     ],
     "require": {
+        "php": ">=5.2.11",
         "xemlock/zefram-composer-installer": "*"
     }
 }

@@ -1,6 +1,7 @@
 {
     "name": "maniple/maniple-requirejs",
-    "type": "zefram-module",
+    "description": "RequireJS integration for maniple",
+    "type": "zend1-module",
     "license": "MIT",
     "authors": [
         {
@@ -10,6 +11,6 @@
     ],
     "require": {
         "php": ">=5.2.11",
-        "xemlock/zend1-composer-installer": "*"
+        "xemlock/zend1-composer-installer": "^0.1.0"
     }
 }

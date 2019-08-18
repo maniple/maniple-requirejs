@@ -2,25 +2,26 @@
 
 class ManipleRequirejs_Bootstrap extends Maniple_Application_Module_Bootstrap
 {
-    protected function _initAutoloader()
+    public function getResourcesConfig()
     {
-        Zend_Loader_AutoloaderFactory::factory(array(
-            'Zend_Loader_StandardAutoloader' => array(
-                'prefixes' => array(
-                    'ManipleRequirejs_' => dirname(__FILE__) . '/library/',
-                ),
-            ),
-        ));
+        return require __DIR__ . '/configs/resources.config.php';
     }
 
-    protected function _initView()
+    public function getViewConfig()
     {
-        /** @var Zend_Application_Bootstrap_Bootstrap $bootstrap */
-        $bootstrap = $this->getApplication();
-        $bootstrap->bootstrap('View');
+        return array(
+            'helperPaths' => array(
+                'ManipleRequirejs_View_Helper_' => __DIR__ . '/library/ManipleRequirejs/View/Helper/',
+            ),
+        );
+    }
 
-        /** @var Zend_View $view */
-        $view = $bootstrap->getResource('View');
-        $view->addHelperPath(dirname(__FILE__) . '/library/View/Helper/', 'ManipleRequirejs_View_Helper_');
+    public function getAutoloaderConfig()
+    {
+        return array(
+            'prefixes' => array(
+                'ManipleRequirejs_' => __DIR__ . '/library/ManipleRequirejs/',
+            ),
+        );
     }
 }

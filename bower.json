@@ -2,6 +2,7 @@
   "name": "maniple-requirejs",
   "private": true,
   "dependencies": {
-    "requirejs": "~2.1.22"
+    "requirejs": "~2.3.6",
+    "requirejs.min": "https://requirejs.org/docs/release/2.3.6/minified/require.js"
   }
 }

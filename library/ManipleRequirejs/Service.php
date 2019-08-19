@@ -9,6 +9,15 @@ class ManipleRequirejs_Service
 {
     const className = __CLASS__;
 
+    const REQUIREJS = 'bower_components/requirejs/require.js';
+
+    const REQUIREJS_MINIFIED = 'bower_components/requirejs.min/index.js';
+
+    /**
+     * @var bool
+     */
+    protected $_minified = true;
+
     /**
      * @var Zend_View_Abstract
      */
@@ -41,6 +50,24 @@ class ManipleRequirejs_Service
         $headScript = $view->getHelper('HeadScript');
         $headScript->prependFile($this->getScriptUrlCallback());
         $headScript->appendScript($this, 'text/javascript', array('noescape' => true));
+    }
+
+    /**
+     * @param bool $minified
+     * @return $this
+     */
+    public function setMinified($minified)
+    {
+        $this->_minified = (bool) $minified;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getMinified()
+    {
+        return $this->_minified;
     }
 
     /**
@@ -166,7 +193,8 @@ class ManipleRequirejs_Service
      */
     public function getScriptUrl()
     {
-        return $this->_view->getHelper('BaseUrl')->baseUrl('bower_components/requirejs/require.js');
+        $requirejs = $this->_minified ? self::REQUIREJS_MINIFIED : self::REQUIREJS;
+        return $this->_view->getHelper('BaseUrl')->baseUrl($requirejs);
     }
 
     /**

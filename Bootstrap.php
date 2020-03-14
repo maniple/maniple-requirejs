@@ -24,4 +24,11 @@ class ManipleRequirejs_Bootstrap extends Maniple_Application_Module_Bootstrap
             ),
         );
     }
+
+    protected function _initView()
+    {
+        // Make sure View is bootstrapped when Requirejs resource is retrieved
+        // inside dependent modules
+        $this->getApplication()->bootstrap('View');
+    }
 }

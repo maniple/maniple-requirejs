@@ -19,16 +19,23 @@ class ManipleRequirejs_Bootstrap extends Maniple_Application_Module_Bootstrap
     public function getAutoloaderConfig()
     {
         return array(
-            'prefixes' => array(
-                'ManipleRequirejs_' => __DIR__ . '/library/ManipleRequirejs/',
+            'Zend_Loader_StandardAutoloader' => array(
+                'prefixes' => array(
+                    'ManipleRequirejs_' => __DIR__ . '/library/ManipleRequirejs/',
+                ),
             ),
         );
     }
 
-    protected function _initView()
+    protected function _initHeadScript()
     {
-        // Make sure View is bootstrapped when Requirejs resource is retrieved
-        // inside dependent modules
-        $this->getApplication()->bootstrap('View');
+        /** @var Maniple_Di_Container $container */
+        $container = $this->getContainer();
+
+        /** @var Zefram_View_Abstract $view */
+        $view = $this->bootstrap('View')->getResource('View');
+        $view->headScript()->appendScript(new ManipleRequirejs_Util_StringCallback(function () use ($container) {
+            $container[ManipleRequirejs_Service::className]->appendToHeadScript();
+        }), 'text/javascript', array('noescape' => true));
     }
 }

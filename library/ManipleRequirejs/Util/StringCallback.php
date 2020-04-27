@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @internal
+ */
 class ManipleRequirejs_Util_StringCallback
 {
     /**

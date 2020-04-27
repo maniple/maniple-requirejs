@@ -19,7 +19,7 @@ class ManipleRequirejs_Service
     protected $_minified = true;
 
     /**
-     * @var Zend_View_Abstract
+     * @var Zend_View_Abstract|Zefram_View_Abstract
      */
     protected $_view;
 
@@ -38,18 +38,14 @@ class ManipleRequirejs_Service
      */
     protected $_shim = array();
 
+    /**
+     * @var boolean
+     */
+    protected $_appended = false;
+
     public function __construct(Zend_View_Abstract $view)
     {
         $this->_view = $view;
-
-        // Attach scripts to HeadScript. It uses the fact, that scripts can be
-        // given not only as strings, but as objects implementing __toString()
-        // method.
-
-        /** @var Zend_View_Helper_HeadScript $headScript */
-        $headScript = $view->getHelper('HeadScript');
-        $headScript->prependFile($this->getScriptUrlCallback());
-        $headScript->appendScript($this, 'text/javascript', array('noescape' => true));
     }
 
     /**
@@ -153,6 +149,26 @@ class ManipleRequirejs_Service
         return $this;
     }
 
+    public function addShims(array $shims)
+    {
+        foreach ($shims as $module => $shim) {
+            $deps = null;
+            $exports = null;
+
+            if (isset($shim['deps']) || isset($shim['exports'])) {
+                $deps = isset($shim['deps']) ? $shim['deps'] : array();
+                $exports = isset($shim['exports']) ? $shim['exports'] : null;
+            } elseif (is_array($shim)) {
+                $deps = $shim;
+            }
+
+            if ($deps || $exports) {
+                $this->addShim($module, $deps, $exports);
+            }
+        }
+        return $this;
+    }
+
     /**
      * @return array
      */
@@ -162,7 +178,7 @@ class ManipleRequirejs_Service
 
         $array['baseUrl'] = $this->_baseUrl
             ? $this->_baseUrl
-            : $this->_view->getHelper('BaseUrl')->baseUrl('/');
+            : $this->_view->baseUrl('/');
 
         if ($this->_paths) {
             $array['paths'] = array_map('strval', $this->_paths);
@@ -185,7 +201,10 @@ class ManipleRequirejs_Service
             'unescapedUnicode' => true,
         ));
 
-        return sprintf('require.config(%s);', $json);
+        // You can define the config object as the global variable require before
+        // require.js is loaded, and have the values applied automatically
+        // https://requirejs.org/docs/api.html#config
+        return sprintf('var require=%s;', $json);
     }
 
     /**
@@ -194,28 +213,30 @@ class ManipleRequirejs_Service
     public function getScriptUrl()
     {
         $requirejs = $this->_minified ? self::REQUIREJS_MINIFIED : self::REQUIREJS;
-        return $this->_view->getHelper('BaseUrl')->baseUrl($requirejs);
+        return $this->_view->baseUrl($requirejs);
     }
 
     /**
-     * This method is for deferring the call to baseUrl, because it requires
-     * request to be defined in the front controller, and this requirement may
-     * not be satisfied during application bootstrap phase.
+     * Appends RequireJS script and configuration to HeadScript view helper container.
      *
-     * @return ManipleRequirejs_Util_StringCallback
+     * @return $this
      */
-    public function getScriptUrlCallback()
+    public function appendToHeadScript()
     {
-        return new ManipleRequirejs_Util_StringCallback(array($this, 'getScriptUrl'));
-    }
+        if (!$this->_appended) {
+            $this->_appended = true;
 
-    /**
-     * Proxy to {@link getConfigScript()}
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->getConfigScript();
+            // Load RequireJS script at the end of the headScript, so that scripts inserted with
+            // SCRIPT tag do not detect it. Otherwise it may break interoperability of non-UMD
+            // scripts that use UMD-aware dependencies.
+
+            // Adding while iterating works, because that's how the Iterator instance returned
+            // by an ArrayObject works.
+            $this->_view->headScript()
+                ->appendScript($this->getConfigScript(), 'text/javascript', array('noescape' => true))
+                ->appendFile($this->getScriptUrl());
+        }
+
+        return $this;
     }
 }

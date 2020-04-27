@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * View helper that provides access to Requirejs service. Perform actions before
+ * rendering HeadScript view helper.
+ */
 class ManipleRequirejs_View_Helper_Requirejs extends Maniple_View_Helper_Abstract
 {
     /**

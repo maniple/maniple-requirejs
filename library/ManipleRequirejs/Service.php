@@ -201,10 +201,9 @@ class ManipleRequirejs_Service
             'unescapedUnicode' => true,
         ));
 
-        // You can define the config object as the global variable require before
-        // require.js is loaded, and have the values applied automatically
-        // https://requirejs.org/docs/api.html#config
-        return sprintf('var require=%s;', $json);
+        return sprintf('requirejs.config(%s);', $json)
+            // add shim for jQuery
+            . "window.jQuery&&define('jquery',[],function(){return window.jQuery});";
     }
 
     /**
@@ -233,8 +232,8 @@ class ManipleRequirejs_Service
             // Adding while iterating works, because that's how the Iterator instance returned
             // by an ArrayObject works.
             $this->_view->headScript()
-                ->appendScript($this->getConfigScript(), 'text/javascript', array('noescape' => true))
-                ->appendFile($this->getScriptUrl());
+                ->appendFile($this->getScriptUrl())
+                ->appendScript($this->getConfigScript(), 'text/javascript', array('noescape' => true));
         }
 
         return $this;

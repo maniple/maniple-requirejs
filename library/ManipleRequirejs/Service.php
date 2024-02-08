@@ -201,7 +201,20 @@ class ManipleRequirejs_Service
             'unescapedUnicode' => true,
         ));
 
-        return sprintf('requirejs.config(%s);', $json)
+        // RequireJS treats package with name ending with .js as url, which cannot be
+        // overridden via 'paths' setting. Which can be problematic, because some requirejs-compatible
+        // libraries have .js suffix in their module names, but can\'t be loaded, because of
+        // incorrect url being resolved.
+        return sprintf('
+            (function () {
+              var load = requirejs.load;
+              requirejs.load = function () {
+                console.log("requirejs.load", arguments);
+                return load.apply(requirejs, arguments);
+              };
+            })();
+            requirejs.config(%s);
+            ', $json)
             // add shim for jQuery
             . "window.jQuery&&define('jquery',[],function(){return window.jQuery});";
     }
